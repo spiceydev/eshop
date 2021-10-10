@@ -28,7 +28,6 @@ class ProductsService implements CRUD {
 
   async getProductsCategory(id: string) {
     const product = await productsDao.getProductById(id);
-
     return product.category;
   }
 }
