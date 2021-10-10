@@ -1,10 +1,10 @@
 import { CommonRoutesConfig } from '../common/common.routes.config';
-import UsersController from './controllers/users.controller';
-import UsersMiddleware from './middleware/users.middleware';
+import usersController from './controllers/users.controller';
+import usersMiddleware from './middleware/users.middleware';
 import jwtMiddleware from '../auth/middleware/jwt.middleware';
 import permissionMiddleware from '../common/middleware/common.permission.middleware';
 import { PermissionFlag } from '../common/middleware/common.permissionflag.enum';
-import BodyValidationMiddleware from '../common/middleware/body.validation.middleware';
+import bodyValidationMiddleware from '../common/middleware/body.validation.middleware';
 import { body } from 'express-validator';
 
 import express from 'express';
@@ -22,28 +22,28 @@ export class UsersRoutes extends CommonRoutesConfig {
         permissionMiddleware.permissionFlagRequired(
           PermissionFlag.ADMIN_PERMISSION
         ),
-        UsersController.listUsers
+        usersController.listUsers
       )
       .post(
         body('email').isEmail(),
         body('password')
           .isLength({ min: 5 })
           .withMessage('Must include password (5+ characters)'),
-        BodyValidationMiddleware.verifyBodyFieldsErrors,
-        UsersMiddleware.validateSameEmailDoesntExist,
-        UsersController.createUser
+        bodyValidationMiddleware.verifyBodyFieldsErrors,
+        usersMiddleware.validateSameEmailDoesntExist,
+        usersController.createUser
       );
 
-    this.app.param(`userId`, UsersMiddleware.extractUserId);
+    this.app.param(`userId`, usersMiddleware.extractUserId);
     this.app
       .route(`/users/:userId`)
       .all(
-        UsersMiddleware.validateUserExists,
+        usersMiddleware.validateUserExists,
         jwtMiddleware.validJWTNeeded,
         permissionMiddleware.onlySameUserOrAdminCanDoThisAction
       )
-      .get(UsersController.getUserById)
-      .delete(UsersController.removeUser);
+      .get(usersController.getUserById)
+      .delete(usersController.removeUser);
 
     this.app.put(`/users/:userId`, [
       body('email').isEmail(),
@@ -53,13 +53,13 @@ export class UsersRoutes extends CommonRoutesConfig {
       body('firstName').isString(),
       body('lastName').isString(),
       body('permissionFlags').isInt(),
-      BodyValidationMiddleware.verifyBodyFieldsErrors,
-      UsersMiddleware.validateSameEmailBelongToSameUser,
-      UsersMiddleware.userCantChangePermission,
+      bodyValidationMiddleware.verifyBodyFieldsErrors,
+      usersMiddleware.validateSameEmailBelongToSameUser,
+      usersMiddleware.userCantChangePermission,
       permissionMiddleware.permissionFlagRequired(
         PermissionFlag.PAID_PERMISSION
       ),
-      UsersController.put,
+      usersController.put,
     ]);
 
     this.app.patch(`/users/:userId`, [
@@ -71,13 +71,13 @@ export class UsersRoutes extends CommonRoutesConfig {
       body('firstName').isString().optional(),
       body('lastName').isString().optional(),
       body('permissionFlags').isInt().optional(),
-      BodyValidationMiddleware.verifyBodyFieldsErrors,
-      UsersMiddleware.validatePatchEmail,
-      UsersMiddleware.userCantChangePermission,
+      bodyValidationMiddleware.verifyBodyFieldsErrors,
+      usersMiddleware.validatePatchEmail,
+      usersMiddleware.userCantChangePermission,
       permissionMiddleware.permissionFlagRequired(
         PermissionFlag.PAID_PERMISSION
       ),
-      UsersController.patch,
+      usersController.patch,
     ]);
 
     this.app.put(`/users/:userId/permissionFlags/:permissionFlags`, [
@@ -86,7 +86,7 @@ export class UsersRoutes extends CommonRoutesConfig {
       permissionMiddleware.permissionFlagRequired(
         PermissionFlag.ADMIN_PERMISSION
       ),
-      UsersController.updatePermissionFlags,
+      usersController.updatePermissionFlags,
     ]);
 
     return this.app;
